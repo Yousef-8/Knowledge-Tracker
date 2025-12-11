@@ -1,0 +1,18 @@
+<%- include('layouts/layout', { title: 'New Topic' }) %>
+
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <h2>Create a Topic</h2>
+    <form method="POST" action="/topics">
+      <div class="mb-3">
+        <label class="form-label">Title</label>
+        <input class="form-control" name="title" required />
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Description</label>
+        <textarea class="form-control" name="description"></textarea>
+      </div>
+      <button class="btn btn-primary">Create</button>
+    </form>
+  </div>
+</div>

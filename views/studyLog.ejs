@@ -1,0 +1,156 @@
+<%- include('layouts/layout', { title: title || 'Study Log' }) %>
+
+<style>
+  body { background: linear-gradient(135deg, #f0f4ff 0%, #ffffff 100%); }
+  .resource-card { transition: transform 0.2s, box-shadow 0.2s; }
+  .resource-card:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
+  .btn-fetch { font-weight: 600; font-size: 1rem; border-radius: 0.75rem; }
+  #resources-list { padding: 0; list-style: none; }
+  #resources-list li { margin-bottom: 15px; }
+  #resources-column { padding-left: 20px; padding-right: 10px; }
+  #tools-column { position: sticky; top: 20px; }
+  #api-result { max-height: 300px; overflow-y: auto; background-color: #f8f9fa; padding: 10px; border-radius: 0.5rem; }
+</style>
+
+<div class="container">
+  <div class="row">
+    <!-- Left column; fetched resources -->
+    <div class="col-lg-8 mb-4" id="resources-column">
+      <h2 class="text-primary mb-1">Study Log #<%= studyLog.id %></h2>
+      <p class="text-muted mb-3">
+        <strong>Duration:</strong> <%= studyLog.duration_in_minutes %> mins
+        <% if(studyLog.notes) { %> | <strong>Notes:</strong> <%= studyLog.notes %> <% } %>
+      </p>
+
+      <h4 class="mb-3">Resources</h4>
+      <ul id="resources-list">
+        <% if (resources && resources.length > 0) { %>
+          <% resources.forEach(r => { %>
+            <li>
+              <div class="card resource-card shadow-sm rounded-4 p-3">
+                <div class="d-flex align-items-start">
+                  <% if(r.source === 'Youtube' && r.thumbnail) { %>
+                    <img src="<%= r.thumbnail %>" class="img-thumbnail me-3 rounded-3" style="width:150px; height:auto; object-fit:cover;">
+                  <% } %>
+                  <div class="flex-grow-1">
+                    <a href="<%= r.url %>" target="_blank" class="h6 text-decoration-none text-dark"><strong><%= r.title %></strong></a>
+                    <div class="small text-muted mb-2"><%= r.source %> • <%= new Date(r.created_at).toLocaleString() %></div>
+                    <p class="mb-1"><%= r.snippet %></p>
+                  </div>
+                </div>
+              </div>
+            </li>
+          <% }) %>
+        <% } else { %>
+          <li class="text-center text-muted">No resources yet. Use the fetch tools to add resources.</li>
+        <% } %>
+      </ul>
+    </div>
+
+    <!-- Right column; buttons options to fetch resources -->
+    <div class="col-lg-4 mb-4" id="tools-column">
+      <div class="card shadow-sm rounded-4 p-3 mb-3">
+        <h5 class="text-secondary mb-3">Fetch Resources</h5>
+        <div class="d-grid gap-2 mb-3">
+          <button id="fetch-youtube" class="btn btn-danger btn-lg btn-fetch">YouTube</button>
+          <button id="fetch-duck" class="btn btn-secondary btn-lg btn-fetch">DuckDuckGo</button>
+          <button id="fetch-wiki" class="btn btn-info btn-lg btn-fetch text-white">Wikipedia</button>
+        </div>
+
+        <input id="query" class="form-control rounded-3 mb-2" placeholder="Search term or leave blank" />
+        <pre id="api-result" class="mt-2"></pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const studyLogId = <%= studyLog.id %>;
+  const defaultQ = "<%= studyLog.notes ? studyLog.notes.replace(/"/g, '\\"') : '' %>";
+  const resourcesList = document.getElementById("resources-list");
+  const elResult = document.getElementById("api-result");
+
+  let ytNextPageToken = null;
+  let duckOffset = 0;
+  let wikiOffset = 0;
+
+  async function fetchAndAppend(path) {
+    try {
+      const res = await fetch(path);
+
+      if (!res.ok) {
+        elResult.innerText = "API Error: " + res.status;
+        return;
+      }
+
+      const data = await res.json();
+      const items = data.results || [];
+
+      if (items.length === 0) {
+        elResult.innerText = "No results found.";
+        return;
+      }
+
+      elResult.innerText = "";
+
+      items.reverse().forEach(r => {
+        const li = document.createElement("li");
+        li.innerHTML = `
+          <div class="card resource-card shadow-sm rounded-4 p-3 mb-3">
+            <div class="d-flex align-items-start">
+
+              ${r.source === 'Youtube' && r.extra?.thumbnail 
+                ? `<img src="${r.extra.thumbnail}" class="img-thumbnail me-3 rounded-3" style="width:150px; object-fit:cover;">`
+                : ''
+              }
+
+              <div class="flex-grow-1">
+                <div class="d-flex justify-content-between align-items-center">
+                  <a href="${r.url}" target="_blank" class="h6 text-decoration-none text-dark">
+                    <strong>${r.title}</strong>
+                  </a>
+
+                  <form action="/study-logs/${studyLogId}/resources" method="POST" class="ms-2">
+                    <input type="hidden" name="resources" value='${JSON.stringify(r)}'>
+                    <button class="btn btn-sm btn-success rounded-3 px-3">Save</button>
+                  </form>
+                </div>
+
+                <div class="small text-muted mb-2">${r.source} • ${new Date().toLocaleString()}</div>
+                <p class="mb-1">${r.snippet || ''}</p>
+              </div>
+            </div>
+          </div>
+        `;
+        resourcesList.insertBefore(li, resourcesList.firstChild);
+      });
+
+      if (data.nextPageToken) ytNextPageToken = data.nextPageToken;
+
+    } catch (err) {
+      elResult.innerText = "Error: " + err.message;
+    }
+  }
+
+  // Youtube button
+  document.getElementById("fetch-youtube").onclick = () => {
+    const q = document.getElementById("query").value || defaultQ;
+    fetchAndAppend(`/api/youtube?q=${encodeURIComponent(q)}&study_log_id=${studyLogId}${ytNextPageToken ? `&pageToken=${ytNextPageToken}` : ''}`);
+  };
+
+  // Duckduckgo button
+  document.getElementById("fetch-duck").onclick = () => {
+    const q = document.getElementById("query").value || defaultQ;
+    duckOffset += 1;
+    fetchAndAppend(`/api/duck?q=${encodeURIComponent(q)}&study_log_id=${studyLogId}&page=${duckOffset}`);
+  };
+
+  // Wikipedia button
+  document.getElementById("fetch-wiki").onclick = () => {
+    const q = document.getElementById("query").value || defaultQ;
+    wikiOffset += 1;
+    fetchAndAppend(`/api/wiki?q=${encodeURIComponent(q)}&study_log_id=${studyLogId}&page=${wikiOffset}`);
+  };
+});
+</script>

@@ -1,0 +1,17 @@
+<%- include('layouts/layout', { title: 'Home' }) %>
+
+<div class="py-5 text-center">
+  <h1 class="display-5">Knowledge Tracker</h1>
+  <p class="lead">Track what you study and fetch related resources automatically.</p>
+  
+  <% if (!currentUser) { %>
+    <div class="mt-4">
+      <a class="btn btn-primary me-2" href="/authentication/register">Get started</a>
+      <a class="btn btn-outline-secondary" href="/authentication/login">Login</a>
+    </div>
+  <% } else { %>
+    <div class="mt-4">
+      <a class="btn btn-success me-2" href="/dashboard">Go to Dashboard</a>
+    </div>
+  <% } %>
+</div>

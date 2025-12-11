@@ -1,0 +1,269 @@
+<%- include('layouts/layout', { title: topic?.title || 'Topic' }) %>
+
+
+<style>
+  :root {
+    --navbar-height: 70px; /* adjust to your navbar height */
+  }
+
+  body {
+    background: linear-gradient(135deg, #f0f4ff 0%, #ffffff 100%);
+  }
+
+  .resource-card,
+  .log-card,
+  .study-log-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .resource-card:hover,
+  .log-card:hover,
+  .study-log-card:hover,
+  .hover-shadow:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  }
+
+  .btn-fetch {
+    font-weight: 600;
+    font-size: 1rem;
+    border-radius: 0.75rem;
+  }
+
+  #resources-list,
+  #logs-list,
+  #study-logs-list {
+    padding: 0;
+    list-style: none;
+  }
+
+  #resources-list li,
+  #logs-list li,
+  #study-logs-list li {
+    margin-bottom: 15px;
+  }
+
+  #resources-column {
+    padding-left: 20px;
+    padding-right: 10px;
+    margin-right: 370px; /* to prevent overlap with tools-column */
+  }
+
+  #tools-column {
+    position: fixed;
+    top: calc(var(--navbar-height) + 20px); /* offset for navbar */
+    right: 15px;
+    width: 350px;
+    max-height: calc(100vh - (var(--navbar-height) + 40px)); /* fit in viewport */
+    overflow-y: auto;
+    z-index: 1000;
+  }
+
+  @media (max-width: 992px) {
+    #tools-column {
+      position: static;
+      width: 100%;
+      max-height: none;
+      margin-bottom: 20px;
+    }
+
+    #resources-column {
+      margin-right: 0;
+    }
+  }
+</style>
+
+
+
+
+<div class="container">
+  <div class="row">
+    <!-- LEFT COLUMN: RESOURCES -->
+    <div class="col-lg-8 mb-4" id="resources-column">
+      <h2 class="text-primary mb-1">
+        <%= topic?.title || 'Untitled Topic' %>
+      </h2>
+      <p class="text-muted mb-3">
+        <%= topic?.description || '' %>
+      </p>
+
+      <h4 class="mb-3">Resources</h4>
+      <ul id="resources-list"></ul>
+    </div>
+
+    <!-- RIGHT COLUMN: FETCH TOOLS + STUDY LOG FORM -->
+    <div class="col-lg-4 mb-4" id="tools-column">
+      <div class="card shadow-sm rounded-4 p-3 mb-3">
+        <h5 class="text-secondary mb-3">Fetch Resources</h5>
+        <div class="d-grid gap-2 mb-3">
+          <button id="fetch-youtube" class="btn btn-danger btn-lg btn-fetch">YouTube</button>
+          <button id="fetch-duck" class="btn btn-secondary btn-lg btn-fetch">DuckDuckGo</button>
+          <button id="fetch-wiki" class="btn btn-info btn-lg btn-fetch text-white">Wikipedia</button>
+        </div>
+
+        <input id="query" class="form-control rounded-3 mb-2" placeholder="Search term or leave blank" />
+        <pre id="api-result" class="mt-2"></pre>
+
+        <!-- COLLAPSIBLE STUDY LOG FORM -->
+        <div class="study-log-card card shadow-sm rounded-4 p-3 mt-3">
+          <h5 class="text-secondary mb-3">Add Study Log</h5>
+          <form id="save-log-form" method="POST" action="/topics/<%= topic.id %>/logs/saveMultiple">
+            <div class="row g-2 mb-2">
+              <div class="col-4">
+                <input class="form-control rounded-3" name="minutes" placeholder="Total Minutes" type="number" />
+              </div>
+              <div class="col">
+                <input class="form-control rounded-3" name="notes" placeholder="Notes (optional)" />
+              </div>
+              <div class="col-auto">
+                <button class="btn btn-primary rounded-3 fw-bold">Save</button>
+              </div>
+            </div>
+            <input type="hidden" name="resources" id="resources-input">
+          </form>
+        </div>
+
+        <!-- STUDY LOGS LIST -->
+        <h5 class="text-secondary mt-4 mb-2">Study Logs</h5>
+        <ul id="study-logs-list" class="list-unstyled"></ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const topicId = <%- JSON.stringify(topic?.id || 0) %>;
+  const defaultQ = <%- JSON.stringify(topic?.title || '') %>;
+  const resourcesData = <%- JSON.stringify(resources || []) %>;
+  const logsData = <%- JSON.stringify(logs || []) %>;
+
+  const resourcesList = document.getElementById("resources-list");
+  const elResult = document.getElementById("api-result");
+  const saveLogForm = document.getElementById("save-log-form");
+  const resourcesInput = document.getElementById("resources-input");
+  const studyLogsList = document.getElementById("study-logs-list");
+
+  let ytNextPageToken = null;
+  let duckOffset = 0;
+  let wikiOffset = 0;
+
+  // Populate existing resources
+  resourcesData.forEach(r => {
+    const li = document.createElement("li");
+    li.innerHTML = `
+      <div class="card resource-card shadow-sm rounded-4 p-3 mb-3">
+        <div class="d-flex align-items-start">
+          ${r.source === 'Youtube' && r.extra?.thumbnail
+            ? `<img src="${r.extra.thumbnail}" class="img-thumbnail me-3 rounded-3" style="width:150px; height:auto; object-fit:cover;">`
+            : ''}
+          <div class="flex-grow-1">
+            <div class="d-flex justify-content-between align-items-center">
+              <a href="${r.url}" target="_blank" class="h6 text-decoration-none text-dark"><strong>${r.title}</strong></a>
+              <input type="checkbox" class="resource-checkbox"
+                     data-title="${r.title}"
+                     data-snippet="${r.snippet || ''}"
+                     data-source="${r.source}"
+                     data-url="${r.url}">
+            </div>
+            <div class="small text-muted mb-2">${r.source} • ${new Date(r.created_at).toLocaleString()}</div>
+            <p class="mb-1">${r.snippet || ''}</p>
+          </div>
+        </div>
+      </div>
+    `;
+    resourcesList.appendChild(li);
+  });
+
+  // Populate study logs
+  logsData.forEach(log => {
+    const li = document.createElement("li");
+    li.classList.add("mb-2");
+    li.innerHTML = `
+      <a href="/study-logs/${log.id}" class="text-decoration-none" target="_blank">
+        <div class="card log-card shadow-sm rounded-4 p-2 hover-shadow">
+          <div><strong>Duration:</strong> ${log.duration_in_minutes} mins
+            ${log.notes ? `| <strong>Notes:</strong> ${log.notes}` : ''}
+          </div>
+          <div class="small text-muted">${new Date(log.created_at).toLocaleString()}</div>
+        </div>
+      </a>
+    `;
+    studyLogsList.appendChild(li);
+  });
+
+  // Fetch and append resources
+  async function fetchAndAppend(path) {
+    try {
+      const res = await fetch(path);
+      const data = await res.json();
+      const items = data.results || [];
+      if (!items.length) {
+        elResult.innerText = "No results found.";
+        return;
+      }
+      elResult.innerText = "";
+      items.reverse().forEach(r => {
+        const li = document.createElement("li");
+        li.innerHTML = `
+          <div class="card resource-card shadow-sm rounded-4 p-3 mb-3">
+            <div class="d-flex align-items-start">
+              ${r.source === 'Youtube' && r.extra?.thumbnail
+                ? `<img src="${r.extra.thumbnail}" class="img-thumbnail me-3 rounded-3" style="width:150px; height:auto; object-fit:cover;">`
+                : ''}
+              <div class="flex-grow-1">
+                <div class="d-flex justify-content-between align-items-center">
+                  <a href="${r.url}" target="_blank" class="h6 text-decoration-none text-dark"><strong>${r.title}</strong></a>
+                  <input type="checkbox" class="resource-checkbox"
+                         data-title="${r.title}"
+                         data-snippet="${r.snippet || ''}"
+                         data-source="${r.source}"
+                         data-url="${r.url}">
+                </div>
+                <div class="small text-muted mb-2">${r.source} • ${new Date().toLocaleString()}</div>
+                <p class="mb-1">${r.snippet || ''}</p>
+              </div>
+            </div>
+          </div>
+        `;
+        resourcesList.insertBefore(li, resourcesList.firstChild);
+      });
+      if (data.nextPageToken) ytNextPageToken = data.nextPageToken;
+    } catch (err) {
+      elResult.innerText = "Error: " + err.message;
+    }
+  }
+
+  // Button handlers
+  document.getElementById("fetch-youtube").onclick = () => {
+    const q = document.getElementById("query").value || defaultQ;
+    fetchAndAppend(`/api/youtube?q=${encodeURIComponent(q)}&topic_id=${topicId}${ytNextPageToken ? `&pageToken=${ytNextPageToken}` : ''}`);
+  };
+  document.getElementById("fetch-duck").onclick = () => {
+    const q = document.getElementById("query").value || defaultQ;
+    duckOffset += 1;
+    fetchAndAppend(`/api/duck?q=${encodeURIComponent(q)}&topic_id=${topicId}&page=${duckOffset}`);
+  };
+  document.getElementById("fetch-wiki").onclick = () => {
+    const q = document.getElementById("query").value || defaultQ;
+    wikiOffset += 1;
+    fetchAndAppend(`/api/wiki?q=${encodeURIComponent(q)}&topic_id=${topicId}&page=${wikiOffset}`);
+  };
+
+  // Save multiple resources
+  saveLogForm.addEventListener('submit', e => {
+    const selected = Array.from(document.querySelectorAll('.resource-checkbox:checked')).map(cb => ({
+      title: cb.dataset.title,
+      snippet: cb.dataset.snippet,
+      source: cb.dataset.source,
+      url: cb.dataset.url
+    }));
+    if (!selected.length) {
+      e.preventDefault();
+      alert("Please select at least one resource to save.");
+      return;
+    }
+    resourcesInput.value = JSON.stringify(selected);
+  });
+});
+</script>
