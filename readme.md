@@ -4,7 +4,7 @@ Knowledge Tracker is a full-stack web app designed to help people keep track of 
 
 ## Overview
 Knowledge Tracker allows users to:
-- **Log topics they are studying**
+- Log topics they are studying
 - Receive related YouTube videos, Wikipedia summaries, and DuckDuckGo instant answers
 - View their learning progress.
 - Sign up using email/password or Google OAuth
