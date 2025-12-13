@@ -47,7 +47,7 @@ This project demonstrates full‑stack development, external API integration and
 - View past topics and activity progress
 - Fetched resources are stored
 - User can add more resources to existing topics
-- 
+
 
 ### **Automatic Resource Fetching**
 When a user adds a topic, just with a click:
