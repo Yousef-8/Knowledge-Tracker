@@ -37,8 +37,6 @@ Thumbs.db
 temp/
 
 # PostgreSQL (local database dumps)
-*.sql
 *.sql.gz
-
 *.txt
 
