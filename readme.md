@@ -24,7 +24,7 @@ This project demonstrates full‑stack development, external API integration and
 
 ### **Frontend**
 -EJS
--Bootstrap
+-Custom CSS and Bootstrap
 
 ### **Authentication**
 - bcrypt (password hashing)
