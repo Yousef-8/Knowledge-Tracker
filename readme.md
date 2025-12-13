@@ -6,7 +6,7 @@ Knowledge Tracker is a full-stack web app designed to help people keep track of 
 Knowledge Tracker allows users to:
 - Log topics they are studying
 - Receive related YouTube videos, Wikipedia information, and DuckDuckGo links
-- View their learning progress.
+- View their learning progress
 - Sign up using email/password or Google OAuth
 
 This project demonstrates full‑stack development, external API integration and secure authentication
@@ -23,8 +23,8 @@ This project demonstrates full‑stack development, external API integration and
 - PostgreSQL
 
 ### **Frontend**
--EJS
--Custom CSS and Bootstrap
+- EJS
+- Custom CSS and Bootstrap
 
 ### **Authentication**
 - bcrypt (password hashing)
@@ -40,11 +40,6 @@ This project demonstrates full‑stack development, external API integration and
 
 
 ##  Features
-###  **Authentication**
-- Registeration and login 
-- Secure hashing with bcrypt
-- Session-based authentication with cookies
-- Google OAuth2 login and registration
 
 ### **Study Tracking**
 - A user can add a study topic
@@ -52,12 +47,20 @@ This project demonstrates full‑stack development, external API integration and
 - View past topics and activity progress
 - Fetched resources are stored
 - User can add more resources to existing topics
+- 
 
 ### **Automatic Resource Fetching**
 When a user adds a topic, just with a click:
 - YouTube API provides related videos
 - DuckDuckGo provides related links
 - Wikipedia search about that resource is provided
+
+###  **Authentication**
+- Registeration and login 
+- Secure hashing with bcrypt
+- Session-based authentication with cookies
+- Google OAuth2 login and registration
+
 
 ### **Dashboard**
 - Shows recent topics and their coreesponding study logs
@@ -81,7 +84,7 @@ npm install
 3. Create `.env` file
 For the APIs and Google OAuth to work you need to visit  https://console.cloud.google.com/ and get your google_client_id, google_client_secret and youtube_key.
 
-For the DATABASE_URL enter your database user, password and name 
+For the DATABASE_URL enter your database user, password and name. 
 ```
 DATABASE_URL=postgresql://user:password@localhost:5432/your_database_name
 SESSION_SECRET=your_session_secret
@@ -100,8 +103,8 @@ Server will run at: http://localhost:3000
 
 
 ## Future Improvements
-- Add a summarizer.
-- Enhanced Frontend using React.js
+- Add a summarizer
+- Enhance Frontend using React.js
 - Recommendation system 
 - Share topics and study logs with others
 
