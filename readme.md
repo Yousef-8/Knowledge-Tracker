@@ -5,7 +5,7 @@ Knowledge Tracker is a full-stack web app designed to help people keep track of 
 ## Overview
 Knowledge Tracker allows users to:
 - Log topics they are studying
-- Receive related YouTube videos, Wikipedia summaries, and DuckDuckGo instant answers
+- Receive related YouTube videos, Wikipedia information, and DuckDuckGo links
 - View their learning progress.
 - Sign up using email/password or Google OAuth
 
@@ -41,17 +41,17 @@ This project demonstrates full‑stack development, external API integration and
 
 ##  Features
 ###  **Authentication**
-- Registeration and  login 
+- Registeration and login 
 - Secure hashing with bcrypt
 - Session-based authentication with cookies
-- Google OAuth login and registration
+- Google OAuth2 login and registration
 
 ### **Study Tracking**
 - A user can add a study topic
 - For each topic ,the user can add study logs that include time and resorces
-- View past topics and activity progress.
+- View past topics and activity progress
 - Fetched resources are stored
-- User can add more resources to existing topics. 
+- User can add more resources to existing topics
 
 ### **Automatic Resource Fetching**
 When a user adds a topic, just with a click:
@@ -62,9 +62,9 @@ When a user adds a topic, just with a click:
 ### **Dashboard**
 - Shows recent topics and their coreesponding study logs
 - A chart that demonstartes how much time is spent one each topic
-- Topics and study logs can be deleted by the user.
+- Topics and study logs can be deleted by the user
 
----
+
 
 ## Installation & Setup
 1. Clone the repository
