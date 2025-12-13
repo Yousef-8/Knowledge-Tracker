@@ -1,6 +1,6 @@
 # Knowledge Tracker
-Knowledge Tracker is a full-stack web app designed to help people keep track of what they’re learning. Users can log any topic they study, and wuth just a click can  finds useful resources—like YouTube videos, quick explanations from DuckDuckGo, and summaries from Wikipedia using public APIs.
-**This is bold text**
+Knowledge Tracker is a full-stack web app designed to help people keep track of what they’re learning. Users can log any topic they study, and with just a click they can finds useful resources—like YouTube videos, quick explanations from DuckDuckGo, and summaries from Wikipedia using public APIs.
+
 
 ## Overview
 Knowledge Tracker allows users to:
@@ -11,7 +11,6 @@ Knowledge Tracker allows users to:
 
 This project demonstrates full‑stack development, external API integration and secure authentication
 
----
 
 ## Tech Stack
 
