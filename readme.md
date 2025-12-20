@@ -43,7 +43,7 @@ This project demonstrates full‑stack development, external API integration and
 
 ### **Study Tracking**
 - A user can add a study topic
-- For each topic ,the user can add study logs that include time and resorces
+- For each topic ,the user can add study logs that include time and resources
 - View past topics and activity progress
 - Fetched resources are stored
 - User can add more resources to existing topics
