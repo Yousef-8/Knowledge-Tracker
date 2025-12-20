@@ -2,8 +2,8 @@
 Knowledge Tracker is a full-stack web app designed to help people keep track of what they’re learning. Users can log any topic they study, and with just a click they can finds useful resources—like YouTube videos, quick explanations from DuckDuckGo, and summaries from Wikipedia using public APIs.
 
 <p float="left">
-  <img src="/dashboard-g.png" width="200" />
-  <img src="/TOPICS-G.png" width="200" />
+  <img src="/dashboard-g.png" width="350" height=400 />
+  <img src="/TOPICS-G.png" width="350" height="450" />
 </p>
 
 
