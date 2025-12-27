@@ -77,7 +77,7 @@ When a user adds a topic, just with a click:
 ## Installation & Setup
 1. Clone the repository
 ```bash
-git clone https://github.com/Yousef-8e/knowledge-tracker.git
+git clone https://github.com/Yousef-8/knowledge-tracker.git
 cd knowledge-tracker
 ```
 
